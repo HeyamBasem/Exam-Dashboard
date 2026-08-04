@@ -1,0 +1,17 @@
+.footer {
+  margin-top: auto;
+  padding: 48px 24px;
+  background-color: var(--bg-primary);
+  border-top: 1px solid var(--border-light);
+}
+
+.footer-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.footer p {
+  color: #9CA3AF;
+  font-size: 14px;
+}
