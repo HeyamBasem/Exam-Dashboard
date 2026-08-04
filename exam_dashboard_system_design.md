@@ -177,7 +177,7 @@ The following features are acknowledged as valuable enhancements but are explici
 | NFR-05 | **Scalability**     | Horizontal scaling capability                                     | Application layer must be stateless |
 | NFR-06 | **Security**        | All data in transit encrypted via TLS 1.2+                        | Mandatory                           |
 | NFR-07 | **Security**        | Passwords stored using BCrypt with cost factor ≥ 10               | Mandatory                           |
-| NFR-08 | **Security**        | JWT tokens expire within 24 hours                                 | Mandatory                           |
+| NFR-08 | **Security**        | JWT Access Tokens expire in 15 minutes; Refresh Tokens in 7 days  | Mandatory                           |
 | NFR-09 | **Security**        | SQL injection prevention via parameterized queries                | Mandatory                           |
 | NFR-10 | **Security**        | CORS policy restricts origins to known frontend domains           | Mandatory                           |
 | NFR-11 | **Usability**       | Responsive design supporting viewport widths from 320px to 2560px | Mandatory                           |
@@ -227,6 +227,11 @@ graph LR
 | **JWT Token Service**   | System | The internal authentication component responsible for token issuance and validation.                                |
 | **PostgreSQL Database** | System | The persistent data store for all application entities.                                                             |
 
+> [!NOTE]
+> **MVP vs Future Actors Scope:**
+> - **MVP Scope:** The `Visitor` actor is fully implemented. The `Admin`, `Teacher`, and `Student` actors only exist as registered user profiles without their associated hierarchical capabilities (e.g., managing schools or taking assessments).
+> - **Future Scope:** The full hierarchical relationships and capabilities for `Admin`, `Teacher`, and `Student` will be implemented in subsequent releases.
+
 ---
 
 <br/>
@@ -261,6 +266,11 @@ The Exam Dashboard implements **Role-Based Access Control (RBAC)** using a singl
 | View Submissions   | ✅    | ✅      | ✅      |
 
 - Students may view only their own submissions.
+
+> [!NOTE]
+> **MVP vs Future Permissions Scope:**
+> - **MVP Scope:** Only "View Landing Page", "Register Account", and "Login" operations are implemented. 
+> - **Future Scope:** All management operations (Districts, Schools, Teachers, Students) and Assessment operations are planned for future releases.
 
 ---
 
@@ -344,12 +354,15 @@ graph TB
 | -------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **Use Case ID**      | UC-02                                                                                                                                                                                                                                                                              |
 | **Name**             | Register Account                                                                                                                                                                                                                                                                   |
-| **Actor**            | Visitor                                                                                                                                                                                                                                                                            |
+| **Actor**            | Visitor (Students and Teachers via invite)                                                                                                                                                                                                                                         |
 | **Precondition**     | User is not authenticated.                                                                                                                                                                                                                                                         |
 | **Main Flow**        | 1. User navigates to the registration page. 2. User enters first name, last name, email, password, and selects a role. 3. System validates input (email uniqueness, password strength). 4. System hashes password and creates user record. 5. System returns success confirmation. |
 | **Alternative Flow** | 3a. Email already exists → System returns 409 Conflict. 3b. Password fails validation → System returns 400 Bad Request with validation details.                                                                                                                                    |
 | **Postcondition**    | User account exists in the database.                                                                                                                                                                                                                                               |
 | **Scope**            | MVP                                                                                                                                                                                                                                                                                |
+
+> [!WARNING]
+> **Administrator Creation:** In production, the open role selection drop-down on the registration page will be restricted to prevent unauthorized users from registering as Administrators. Administrators will be seeded directly into the database or created via an internal admin portal. The current MVP exposes the Admin role in the drop-down strictly for testing purposes.
 
 #### UC-03: Login
 
@@ -435,7 +448,7 @@ graph TB
 
 <br/>
 
-## 11. High-Level Architecture — Monolithic
+## 11. Full Target Architecture — Monolithic
 
 ### 11.1 Overview
 
@@ -576,6 +589,22 @@ The monolithic application follows a strict **layered architecture** pattern:
 | **Service**      | Business logic, transaction management, cross-cutting concerns | `@Service` classes                         |
 | **Repository**   | Data access abstraction, query definition                      | `@Repository` / `JpaRepository` interfaces |
 | **Domain**       | Entity definitions, domain constraints                         | `@Entity` classes                          |
+
+### 11.5 MVP Architecture vs Target Architecture
+
+> [!NOTE]
+> The architecture diagrams above depict the **Full Target Architecture** (Future Scope). 
+> For the **Current MVP Release (1.0)**, only a subset of these components is implemented:
+> 
+> **Included in MVP:**
+> - React SPA (Landing, Login, Register, basic Dashboard)
+> - `AuthController`, `AuthService`, `Auth Module`
+> - `UserController`, `UserService`, `User Module` (for basic profile setup)
+> - `UserRepository`, `users` table
+> - Spring Security JWT Filter chain
+> 
+> **Excluded from MVP (Future Scope):**
+> - `DistrictModule`, `SchoolModule`, `AssessmentModule`, `SubmissionModule` and all their related controllers, services, repositories, and tables.
 
 ---
 
@@ -782,6 +811,9 @@ graph LR
 2. **Third Normal Form (3NF)** The schema is normalized to eliminate redundancy and ensure data integrity.
 3. **Referential Integrity** All foreign key relationships are enforced at the database level.
 4. **Soft Deletes** Entities use an `is_active` flag rather than physical deletion, preserving audit trails and referential integrity.
+   - **Cascading Behavior:** Soft-deleting a parent entity (e.g., School) automatically cascades the soft-delete state to its child entities (e.g., enrolled Students and assigned Teachers).
+   - **Filtering Inactive Records:** Application queries globally filter out inactive records (e.g., using Hibernate `@SQLRestriction("is_active = true")`), ensuring deleted records are invisible to standard users.
+   - **Restoration:** Administrators retain the capability to view inactive records and restore them by toggling the `is_active` flag back to true.
 5. **Timestamps** All entities track `created_at` and `updated_at` timestamps for auditability.
 
 ### 14.2 Entity Descriptions
@@ -880,6 +912,11 @@ graph LR
 | `submissions` | `idx_submissions_assessment_id` | `assessment_id`             | B-TREE | Find submissions for an assessment        |
 | `submissions` | `idx_submissions_unique`        | `student_id, assessment_id` | UNIQUE | One submission per student per assessment |
 
+> [!NOTE]
+> **MVP vs Future Schema Scope:**
+> - **MVP Scope:** Only the `users` table is required for the initial MVP to support Registration and Authentication. 
+> - **Future Scope:** The `districts`, `schools`, `assessments`, and `submissions` tables, along with all their associated foreign key relationships and indexes, will be implemented in subsequent releases.
+
 ---
 
 <br/>
@@ -967,6 +1004,11 @@ erDiagram
 | User (Teacher) → Assessment | One-to-Many | A teacher creates many assessments; each assessment has one creating teacher.                                                |
 | User (Student) → Submission | One-to-Many | A student makes many submissions (across different assessments); each submission belongs to one student.                     |
 | Assessment → Submission     | One-to-Many | An assessment receives many submissions; each submission is for one assessment.                                              |
+
+> [!NOTE]
+> **MVP vs Future ERD Scope:**
+> - **MVP Scope:** For the MVP, the `USERS` entity operates in isolation. The `school_id` foreign key will remain `NULL` as schools are not yet implemented.
+> - **Future Scope:** All entity relationships shown in the diagram above (`DISTRICTS`, `SCHOOLS`, `ASSESSMENTS`, `SUBMISSIONS`) represent the full Target Architecture and will be introduced post-MVP.
 
 ---
 
@@ -1082,21 +1124,32 @@ graph LR
 
 ```mermaid
 stateDiagram-v2
-    [*] --> Issued: Login Success
-    Issued --> Valid: Token within expiration
-    Valid --> Used: Sent in Authorization header
-    Used --> Valid: Request processed
-    Valid --> Expired: Current time > exp claim
+    [*] --> Issued: Login Success (Access & Refresh Tokens)
+    Issued --> AccessValid: Access Token within expiration (15m)
+    AccessValid --> Used: Sent via Authorization header / Cookie
+    Used --> AccessValid: Request processed
+    AccessValid --> AccessExpired: Current time > exp claim
+    AccessExpired --> RefreshAttempt: Interceptor catches 401
+    RefreshAttempt --> AccessValid: Refresh Token valid (7d) -> New Access Token
+    RefreshAttempt --> Expired: Refresh Token expired/invalid
     Expired --> [*]: User must re-login
-    Valid --> Revoked: Logout / Force invalidation
+    AccessValid --> Revoked: Logout / Force invalidation
+    RefreshAttempt --> Revoked: Logout
     Revoked --> [*]: User must re-login
 
-    note right of Valid
-        Token is stateless.
+    note right of AccessValid
+        Tokens are stateless.
         Server validates on each request
         without database lookup.
     end note
 ```
+
+### 17.4 Token Storage Strategy (Target vs MVP)
+
+> [!NOTE]
+> **MVP vs Target Implementation:** 
+> - **MVP:** Tokens are currently stored in `localStorage`. This is susceptible to XSS attacks but sufficient for initial testing and rapid prototyping.
+> - **Target Architecture:** The system will transition to storing the Access Token and Refresh Token in **HttpOnly Secure cookies**. This mitigates XSS by preventing client-side JavaScript access to the tokens, and protects against CSRF when used with proper `SameSite` attributes.
 
 ## 18. Future Enhancements
 
