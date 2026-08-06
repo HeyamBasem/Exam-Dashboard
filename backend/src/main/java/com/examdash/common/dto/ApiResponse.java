@@ -6,7 +6,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.List;
 
 @Data
@@ -19,14 +19,16 @@ public class ApiResponse<T> {
     private String message;
     private T data;
     private List<FieldError> errors;
-    private LocalDateTime timestamp;
+    
+    // Fixed: Using Instant enforces UTC to prevent timezone ambiguity
+    private Instant timestamp;
 
     public static <T> ApiResponse<T> success(String message, T data) {
         return ApiResponse.<T>builder()
                 .success(true)
                 .message(message)
                 .data(data)
-                .timestamp(LocalDateTime.now())
+                .timestamp(Instant.now())
                 .build();
     }
 
@@ -34,7 +36,7 @@ public class ApiResponse<T> {
         return ApiResponse.<T>builder()
                 .success(false)
                 .message(message)
-                .timestamp(LocalDateTime.now())
+                .timestamp(Instant.now())
                 .build();
     }
 
@@ -43,7 +45,7 @@ public class ApiResponse<T> {
                 .success(false)
                 .message(message)
                 .errors(errors)
-                .timestamp(LocalDateTime.now())
+                .timestamp(Instant.now())
                 .build();
     }
 
