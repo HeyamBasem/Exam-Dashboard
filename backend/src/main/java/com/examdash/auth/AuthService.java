@@ -10,9 +10,12 @@ import com.examdash.user.Role;
 import com.examdash.user.User;
 import com.examdash.user.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.util.Locale;
 
 @Service
 @RequiredArgsConstructor
@@ -22,15 +25,21 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
 
+    @Value("${app.jwt.expiration-ms}")
+    private long jwtExpirationMs;
+
     public RegisterResponse register(RegisterRequest request) {
-        if (userRepository.existsByEmail(request.getEmail())) {
-            throw new EmailAlreadyExistsException("Email is already registered: " + request.getEmail());
+        // Normalizing the email by trimming and lowercasing
+        String normalizedEmail = request.getEmail().trim().toLowerCase(Locale.ROOT);
+
+        if (userRepository.existsByEmail(normalizedEmail)) {
+            throw new EmailAlreadyExistsException("Email is already registered: " + normalizedEmail);
         }
 
         User user = User.builder()
                 .firstName(request.getFirstName())
                 .lastName(request.getLastName())
-                .email(request.getEmail())
+                .email(normalizedEmail)
                 .passwordHash(passwordEncoder.encode(request.getPassword()))
                 .role(Role.valueOf(request.getRole().toUpperCase()))
                 .build();
@@ -45,7 +54,10 @@ public class AuthService {
     }
 
     public AuthResponse login(LoginRequest request) {
-        User user = userRepository.findByEmail(request.getEmail())
+        // Normalizing the email by trimming and lowercasing
+        String normalizedEmail = request.getEmail().trim().toLowerCase(Locale.ROOT);
+
+        User user = userRepository.findByEmail(normalizedEmail)
                 .orElseThrow(() -> new BadCredentialsException("Invalid credentials"));
 
         if (!passwordEncoder.matches(request.getPassword(), user.getPasswordHash())) {
@@ -53,7 +65,8 @@ public class AuthService {
         }
 
         if (!user.getIsActive()) {
-            throw new BadCredentialsException("Account is deactivated");
+            // Security Fix: Do not leak that the account exists and is deactivated
+            throw new BadCredentialsException("Invalid credentials");
         }
 
         String token = jwtTokenProvider.generateToken(user);
@@ -61,7 +74,7 @@ public class AuthService {
         return AuthResponse.builder()
                 .accessToken(token)
                 .tokenType("Bearer")
-                .expiresIn(86400)
+                .expiresIn(jwtExpirationMs / 1000) // Converted to seconds!
                 .build();
     }
 }
