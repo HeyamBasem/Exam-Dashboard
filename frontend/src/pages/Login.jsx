@@ -1,38 +1,40 @@
-import React, { useState, useContext } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { Eye, EyeOff, Mail, Lock, Loader2 } from 'lucide-react';
-import { AuthContext } from '../auth/AuthContext';
-import './Login.css';
+import React, { useState, useContext } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { Eye, EyeOff, Mail, Lock, Loader2 } from "lucide-react";
+import { AuthContext } from "../auth/AuthContext";
+import "./Login.css";
 
 const Login = () => {
   const [formData, setFormData] = useState({
-    email: '',
-    password: ''
+    email: "",
+    password: "",
   });
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-  
+  const [error, setError] = useState("");
+
   const navigate = useNavigate();
   const { login } = useContext(AuthContext);
 
   const handleChange = (e) => {
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value
+      [e.target.name]: e.target.value,
     });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
+    setError("");
     setLoading(true);
 
     try {
       await login(formData.email, formData.password);
-      navigate('/dashboard');
+      navigate("/dashboard");
     } catch (err) {
-      setError(err.response?.data?.message || 'Login failed. Please try again.');
+      setError(
+        err.response?.data?.message || "Login failed. Please try again.",
+      );
     } finally {
       setLoading(false);
     }
@@ -48,7 +50,7 @@ const Login = () => {
           <h2>Welcome Back</h2>
           <p>Sign in to your account to continue</p>
         </div>
-        
+
         {error && <div className="auth-error-banner">{error}</div>}
 
         <form className="auth-form" onSubmit={handleSubmit}>
@@ -79,8 +81,8 @@ const Login = () => {
                 placeholder="••••••••••••"
                 required
               />
-              <button 
-                type="button" 
+              <button
+                type="button"
                 className="btn-toggle-password"
                 onClick={() => setShowPassword(!showPassword)}
               >
@@ -94,12 +96,14 @@ const Login = () => {
               <input type="checkbox" />
               <span>Remember me</span>
             </label>
-            <a href="#" className="forgot-password">Forgot password?</a>
+            <Link to="/forgot-password" className="forgot-password">
+              Forgot password?
+            </Link>
           </div>
 
           <button type="submit" className="btn-submit" disabled={loading}>
             {loading ? <Loader2 className="spin" size={18} /> : null}
-            {loading ? 'Signing in...' : 'Sign In'}
+            {loading ? "Signing in..." : "Sign In"}
           </button>
         </form>
 

@@ -1,5 +1,6 @@
 import React, { createContext, useState, useEffect } from "react";
 import api from "../api/axios";
+import { LoadingSpinner } from "../components/LoadingSpinner";
 
 export const AuthContext = createContext();
 
@@ -53,7 +54,7 @@ export const AuthProvider = ({ children }) => {
     setUser(null);
   };
 
-  if (loading) return null;
+  if (loading) return <LoadingSpinner />;
 
   return (
     <AuthContext.Provider
