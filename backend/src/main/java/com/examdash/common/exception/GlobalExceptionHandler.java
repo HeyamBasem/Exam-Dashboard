@@ -1,5 +1,6 @@
 package com.examdash.common.exception;
 
+import com.examdash.assessment.exception.AssessmentNotFoundException;
 import com.examdash.auth.exception.EmailAlreadyExistsException;
 import com.examdash.common.dto.ApiResponse;
 import lombok.extern.slf4j.Slf4j;
@@ -45,6 +46,20 @@ public class GlobalExceptionHandler {
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
                 .body(ApiResponse.error("Validation failed", fieldErrors));
+    }
+
+    @ExceptionHandler(AssessmentNotFoundException.class)
+    public ResponseEntity<ApiResponse<Void>> handleAssessmentNotFound(AssessmentNotFoundException ex) {
+        return ResponseEntity
+                .status(HttpStatus.NOT_FOUND)
+                .body(ApiResponse.error(ex.getMessage()));
+    }
+
+    @ExceptionHandler(ForbiddenException.class)
+    public ResponseEntity<ApiResponse<Void>> handleForbidden(ForbiddenException ex) {
+        return ResponseEntity
+                .status(HttpStatus.FORBIDDEN)
+                .body(ApiResponse.error(ex.getMessage()));
     }
 
     @ExceptionHandler(IllegalArgumentException.class)
