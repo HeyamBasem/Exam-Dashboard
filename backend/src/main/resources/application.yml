@@ -24,6 +24,7 @@ app:
   jwt:
     secret: examdashboard-dev-secret-key-that-is-at-least-256-bits-long-for-hs256
     expiration-ms: 86400000
+
   cors:
     allowed-origins: http://localhost:5173,http://localhost:3000
 
