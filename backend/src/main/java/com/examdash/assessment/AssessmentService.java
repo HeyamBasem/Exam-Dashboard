@@ -4,6 +4,7 @@ import com.examdash.assessment.dto.AssessmentResponse;
 import com.examdash.assessment.dto.CreateAssessmentRequest;
 import com.examdash.assessment.dto.UpdateAssessmentRequest;
 import com.examdash.assessment.exception.AssessmentNotFoundException;
+import com.examdash.auth.exception.AuthenticatedUserNotFoundException;
 import com.examdash.common.dto.PagedResponse;
 import com.examdash.common.exception.ForbiddenException;
 import com.examdash.user.Role;
@@ -18,9 +19,8 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
+import java.time.Instant; //changed to Instant for consistency
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -30,17 +30,14 @@ public class AssessmentService {
     private final AssessmentRepository assessmentRepository;
     private final UserRepository userRepository;
 
-    private static final Set<String> ALLOWED_SORT_FIELDS = Set.of(
-            "createdAt", "title", "subject", "grade", "totalMarks", "durationMinutes"
-    );
+    // changed to use Enum for validation instead of string comparison using a Set
+    public enum SortField {
+        createdAt, title, subject, grade, totalMarks, durationMinutes
+    }
 
     public AssessmentResponse create(CreateAssessmentRequest request) {
         User currentUser = getAuthenticatedUser();
 
-        // Authorization: Only ADMIN and TEACHER can create assessments
-        if (currentUser.getRole() == Role.STUDENT) {
-            throw new ForbiddenException("Students are not allowed to create assessments");
-        }
 
         Assessment assessment = Assessment.builder()
                 .title(request.getTitle())
@@ -64,15 +61,17 @@ public class AssessmentService {
     }
 
     public PagedResponse<AssessmentResponse> getAll(
-            int page, int limit,
+            int page, int size, // changed limit to size
             String subject, Integer grade,
             String sortBy, String sortOrder) {
 
-        // Validate sort field against whitelist
-        if (!ALLOWED_SORT_FIELDS.contains(sortBy)) {
+        // changed to use Enum for validation
+        try {
+            SortField.valueOf(sortBy);
+        } catch (IllegalArgumentException e) {
             throw new IllegalArgumentException(
                     "Invalid sort field: " + sortBy
-                            + ". Allowed fields: " + ALLOWED_SORT_FIELDS);
+                            + ". Allowed fields: createdAt, title, subject, grade, totalMarks, durationMinutes");
         }
 
         // Validate sort order
@@ -82,13 +81,13 @@ public class AssessmentService {
                             + ". Allowed values: asc, desc");
         }
 
-        // Clamp limit to valid range
-        limit = Math.max(1, Math.min(limit, 100));
+        // Clamp size to valid range
+        size = Math.max(1, Math.min(size, 100)); // changed limit to size
 
         Sort sort = sortOrder.equalsIgnoreCase("asc")
                 ? Sort.by(sortBy).ascending()
                 : Sort.by(sortBy).descending();
-        Pageable pageable = PageRequest.of(page, limit, sort);
+        Pageable pageable = PageRequest.of(page, size, sort); // changed limit to size
 
         // Build dynamic specification
         Specification<Assessment> spec = AssessmentSpecification.isNotDeleted();
@@ -143,18 +142,13 @@ public class AssessmentService {
         User currentUser = getAuthenticatedUser();
         checkModifyPermission(currentUser, assessment);
 
-        assessment.setDeletedAt(LocalDateTime.now());
+        assessment.setDeletedAt(Instant.now()); //changed to Instant.now() for consistency
         assessmentRepository.save(assessment);
     }
 
     // ── Authorization helpers ──────────────────────────────────────────
 
     private void checkModifyPermission(User currentUser, Assessment assessment) {
-        // STUDENT cannot modify assessments
-        if (currentUser.getRole() == Role.STUDENT) {
-            throw new ForbiddenException("Students are not allowed to modify assessments");
-        }
-
         // ADMIN can modify any assessment
         if (currentUser.getRole() == Role.ADMIN) {
             return;
@@ -169,7 +163,7 @@ public class AssessmentService {
     private User getAuthenticatedUser() {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
         return userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("Authenticated user not found"));
+                .orElseThrow(() -> new AuthenticatedUserNotFoundException("Authentication failed"));
     }
 
     // ── Entity → DTO mapper ────────────────────────────────────────────

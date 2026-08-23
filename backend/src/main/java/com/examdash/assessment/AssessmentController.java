@@ -15,6 +15,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize; //changed to PreAuthorize for role-based access control
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -24,7 +25,8 @@ import org.springframework.web.bind.annotation.*;
 public class AssessmentController {
 
     private final AssessmentService assessmentService;
-
+    
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'TEACHER')")
     @PostMapping
     @Operation(summary = "Create a new assessment",
             description = "Creates an assessment. Requires authentication. Only ADMIN and TEACHER roles are allowed. STUDENT is forbidden.")
@@ -64,7 +66,7 @@ public class AssessmentController {
             @RequestParam(defaultValue = "0") int page,
 
             @Parameter(description = "Page size. Typical maximum is 100.", example = "10")
-            @RequestParam(defaultValue = "10") int limit,
+            @RequestParam(defaultValue = "10") int size, 
 
             @Parameter(description = "Filter by exact subject name", example = "Math")
             @RequestParam(required = false) String subject,
@@ -79,7 +81,7 @@ public class AssessmentController {
             @RequestParam(defaultValue = "desc") String sortOrder) {
 
         PagedResponse<AssessmentResponse> data = assessmentService.getAll(
-                page, limit, subject, grade, sortBy, sortOrder);
+                page, size, subject, grade, sortBy, sortOrder); 
         return ResponseEntity.ok(
                 ApiResponse.success("Assessments retrieved successfully", data));
     }
@@ -102,6 +104,8 @@ public class AssessmentController {
                 ApiResponse.success("Assessment retrieved successfully", data));
     }
 
+    //Restrict access to ADMIN and TEACHER roles
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'TEACHER')") // added PreAuthorize to restrict access to ADMIN and TEACHER roles instead of checking roles in the assessmentService
     @PutMapping("/{id}")
     @Operation(summary = "Update an assessment",
             description = "Full replacement update of an assessment. ADMIN can update any assessment. TEACHER can update only assessments they created. STUDENT is forbidden.")
@@ -124,7 +128,8 @@ public class AssessmentController {
         return ResponseEntity.ok(
                 ApiResponse.success("Assessment updated successfully", data));
     }
-
+    // Restrict access to ADMIN and TEACHER roles
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'TEACHER')") // added PreAuthorize to restrict access to ADMIN and TEACHER roles instead of checking roles in the assessmentService
     @DeleteMapping("/{id}")
     @Operation(summary = "Soft delete an assessment",
             description = "Marks the assessment as deleted (sets deletedAt). The record is not physically removed, but will be excluded from normal GET endpoints. GET by ID for a deleted assessment returns 404. ADMIN can delete any assessment. TEACHER can delete only their own assessment. STUDENT is forbidden.")

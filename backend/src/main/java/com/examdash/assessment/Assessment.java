@@ -4,7 +4,7 @@ import com.examdash.user.User;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.time.LocalDateTime;
+import java.time.Instant;  // Import the Instant class for timestamp handling instead of LocalDateTime
 
 @Entity
 @Table(name = "assessments")
@@ -41,23 +41,26 @@ public class Assessment {
     @JoinColumn(name = "created_by", nullable = false)
     private User createdBy;
 
+// changed LocalDateTime to Instant for deletedAt, createdAt, and updatedAt fields
     @Column(name = "deleted_at")
-    private LocalDateTime deletedAt;
+    private Instant deletedAt;
 
     @Column(name = "created_at", nullable = false, updatable = false)
-    private LocalDateTime createdAt;
+    private Instant createdAt;
 
     @Column(name = "updated_at", nullable = false)
-    private LocalDateTime updatedAt;
+    private Instant updatedAt;
 
+// changed LocalDateTime to Instant here for the onCreate and onUpdate methods
     @PrePersist
     protected void onCreate() {
-        createdAt = LocalDateTime.now();
-        updatedAt = LocalDateTime.now();
+        createdAt = Instant.now();
+        updatedAt = Instant.now();
     }
 
+// changed LocalDateTime to Instant here also for the updatedAt field
     @PreUpdate
     protected void onUpdate() {
-        updatedAt = LocalDateTime.now();
+        updatedAt = Instant.now();
     }
 }

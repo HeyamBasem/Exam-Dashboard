@@ -7,7 +7,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
+import java.time.Instant; // we changed to Instant for consistency as we changed it in the assessment entity as well, so that the timestamps are consistent across the application
 
 @Data
 @Builder
@@ -41,8 +41,8 @@ public class AssessmentResponse {
     private String createdBy;
     
     @Schema(description = "The timestamp when the assessment was created", example = "2026-08-09T15:00:00Z")
-    private LocalDateTime createdAt;
+    private Instant createdAt; // Changed it from LocalDateTime to Instant for consistency with the entity and to ensure that timestamps are stored in UTC format across the application.
     
     @Schema(description = "The timestamp when the assessment was last updated", example = "2026-08-09T15:30:00Z")
-    private LocalDateTime updatedAt;
+    private Instant updatedAt; // Changed it from LocalDateTime to Instant for consistency with the entity and to ensure that timestamps are stored in UTC format across the application.
 }
