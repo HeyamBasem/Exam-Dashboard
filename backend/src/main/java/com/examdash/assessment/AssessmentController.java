@@ -26,7 +26,7 @@ public class AssessmentController {
 
     private final AssessmentService assessmentService;
     
-    @PreAuthorize("hasAnyAuthority('ADMIN', 'TEACHER')")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('TEACHER')")
     @PostMapping
     @Operation(summary = "Create a new assessment",
             description = "Creates an assessment. Requires authentication. Only ADMIN and TEACHER roles are allowed. STUDENT is forbidden.")
@@ -105,7 +105,7 @@ public class AssessmentController {
     }
 
     //Restrict access to ADMIN and TEACHER roles
-    @PreAuthorize("hasAnyAuthority('ADMIN', 'TEACHER')") // added PreAuthorize to restrict access to ADMIN and TEACHER roles instead of checking roles in the assessmentService
+    @PreAuthorize("hasRole('ADMIN') or hasRole('TEACHER')") // added PreAuthorize to restrict access to ADMIN and TEACHER roles instead of checking roles in the assessmentService
     @PutMapping("/{id}")
     @Operation(summary = "Update an assessment",
             description = "Full replacement update of an assessment. ADMIN can update any assessment. TEACHER can update only assessments they created. STUDENT is forbidden.")
@@ -129,7 +129,7 @@ public class AssessmentController {
                 ApiResponse.success("Assessment updated successfully", data));
     }
     // Restrict access to ADMIN and TEACHER roles
-    @PreAuthorize("hasAnyAuthority('ADMIN', 'TEACHER')") // added PreAuthorize to restrict access to ADMIN and TEACHER roles instead of checking roles in the assessmentService
+    @PreAuthorize("hasRole('ADMIN') or hasRole('TEACHER')") // added PreAuthorize to restrict access to ADMIN and TEACHER roles instead of checking roles in the assessmentService
     @DeleteMapping("/{id}")
     @Operation(summary = "Soft delete an assessment",
             description = "Marks the assessment as deleted (sets deletedAt). The record is not physically removed, but will be excluded from normal GET endpoints. GET by ID for a deleted assessment returns 404. ADMIN can delete any assessment. TEACHER can delete only their own assessment. STUDENT is forbidden.")
