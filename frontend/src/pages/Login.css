@@ -75,9 +75,9 @@
   pointer-events: none;
 }
 
-.input-wrapper input {
-  padding-left: 44px;
-  padding-right: 44px;
+.auth-form .input-wrapper input {
+  padding-left: 44px !important;
+  padding-right: 44px !important;
 }
 
 .btn-toggle-password {
