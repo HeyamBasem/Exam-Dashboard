@@ -30,7 +30,6 @@ To deploy your local application on Kubernetes, you only need to master **4 core
 * **[Docker Official Getting Started Guide](https://docs.docker.com/get-started/)**: Official hands-on tutorial for building images and running containers step-by-step.
 * **[Kubernetes Basics Interactive Tutorial](https://kubernetes.io/docs/tutorials/kubernetes-basics/)**: Browser-based scenario tutorials directly from the Kubernetes project.
 * **[Killercoda Kubernetes & Docker Interactive Environments](https://killercoda.com/)**: Free interactive browser terminals with pre-configured Linux, Docker, and Kubernetes environments (no local installation required).
-* **[Play with Docker](https://labs.play-with-docker.com/)**: Web-based sandbox to test and execute Docker commands in a live container environment.
 
 ### 2. Best Free Video Courses
 * **[TechWorld with Nana — Docker Tutorial for Beginners](https://www.youtube.com/watch?v=3c-iBn73dDE)** (~2 hrs): Covers `Dockerfile` creation, image registries, networking, and Docker Compose with clear visual diagrams.
