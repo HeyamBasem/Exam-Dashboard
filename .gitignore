@@ -25,3 +25,7 @@ replay_pid*
 
 #intellij
 .idea/
+# Maven build output
+target/
+# Environment Variables
+backend/.env
