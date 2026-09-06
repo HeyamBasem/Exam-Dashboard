@@ -1,0 +1,21 @@
+#for frontend deployment  serves React static files via Nginx 2 replicas for high availability
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: frontend
+  template:
+    metadata:
+      labels:
+        app: frontend
+    spec:
+      containers:
+        - name: frontend
+          image: exam-dashboard-frontend:v1
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 80
