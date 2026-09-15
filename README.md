@@ -7,32 +7,39 @@ ExamDash is an enterprise-grade assessment management platform built to streamli
 - **Dashboard Analytics:** Quick overview of total exams, completed assessments, and pending tasks.
 - **Assessment Builder:** Import assessments via CSV/PDF file parsing.
 - **Modern UI:** Sleek, responsive, and intuitive interface built with React and Vite.
+
 ## 🛠️ Tech Stack
 - **Frontend:** React 19, Vite, React Router, Nginx
 - **Backend:** Spring Boot (Java 21), Spring Security, RESTful APIs
 - **Database:** PostgreSQL 15
 - **Infrastructure:** Docker, Docker Compose, Kubernetes (Minikube)
 
-
-
 ## 🎯 Purpose & Vision
 Educational institutions often struggle with fragmented tools for creating exams, tracking student performance, and managing school districts. ExamDash solves this by providing a single, unified platform where:
 - **Educators** can easily author or import assessments and monitor class performance in real-time.
 - **Students** experience a secure, distraction-free environment to take their exams.
 - **Administrators** gain high-level oversight over district management and role assignments.
+
 By automating the administrative heavy lifting, ExamDash allows teachers to focus on what matters most: student success.
+
 ---
+
 ## 🧑‍💻 Core Workflows & Usage
+
 ### For Teachers & Instructors
 * **Dashboard Overview:** Instantly see active exams, average scores, and completion rates.
 * **Assessment Builder:** Manually author questions or bulk-import existing tests via CSV and PDF parsers.
 * **Analytics:** Track recent activity and identify areas where students are struggling.
+
 ### For Students
 * **Seamless Testing:** Log in to a clean, intuitive portal to view pending assessments.
 * **Instant Feedback:** (Coming Soon) View grades and performance metrics immediately upon exam completion.
+
 ### For Administrators
 * **District Management:** Oversee multiple schools, user roles, and system-wide metrics from a centralized control panel.
+
 ---
+
 ## API Documentation
 The API documentation is powered by Swagger UI and OpenAPI 3.0.
 
@@ -45,13 +52,17 @@ To view and interact with the API documentation:
    - Paste your JWT token and click Authorize.
    - You can now test the Assessment endpoints securely.
 
- ---
- ## Getting Started
+---
+
+## 🚀 Getting Started
 You can run this project locally using either **Docker Compose** (recommended for quick testing) or **Kubernetes** (full production-style architecture).
+
 ### Prerequisites
 - [Docker Desktop](https://www.docker.com/products/docker-desktop)
 - [Minikube](https://minikube.sigs.k8s.io/docs/start/) & [kubectl](https://kubernetes.io/docs/tasks/tools/) (for the Kubernetes deployment)
+
 ---
+
 ### Option A: Run with Docker Compose
 1. Clone the repository and navigate to the project root:
    ```bash
@@ -69,7 +80,9 @@ You can run this project locally using either **Docker Compose** (recommended fo
    ```bash
    docker compose down
    ```
+
 ---
+
 ### Option B: Run with Kubernetes (Minikube)
 1. Start your local Kubernetes cluster:
    ```bash
@@ -101,4 +114,3 @@ You can run this project locally using either **Docker Compose** (recommended fo
    ```bash
    kubectl delete -f k8s/
    ```
----
