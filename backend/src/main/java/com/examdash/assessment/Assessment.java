@@ -6,6 +6,9 @@ import lombok.*;
 
 import java.time.Instant;  // Import the Instant class for timestamp handling instead of LocalDateTime
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity
 @Table(name = "assessments")
 @Getter
@@ -63,4 +66,8 @@ public class Assessment {
     protected void onUpdate() {
         updatedAt = Instant.now();
     }
+
+    @OneToMany
+    (mappedBy = "assessment", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Question> questions = new ArrayList<>();
 }

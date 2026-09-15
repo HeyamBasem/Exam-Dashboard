@@ -1,0 +1,41 @@
+#for backend deployment in Kubernetes it depends on the database service to be up and running before it can start. The backend service will use the database service to connect to the database and perform CRUD operations
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: backend
+  template:
+    metadata:
+      labels:
+        app: backend
+    spec:
+      containers:
+        - name: backend
+          image: exam-dashboard-backend:v1
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 8080
+          env:
+            - name: DB_URL
+              value: jdbc:postgresql://postgres:5432/examdashboard
+            - name: DB_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: exam-db-secret
+                  key: DB_USER
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: exam-db-secret
+                  key: DB_PASS
+            - name: JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: exam-db-secret
+                  key: JWT_SECRET
+            - name: CORS_ALLOWED_ORIGINS
+              value: "http://127.0.0.1:54258"

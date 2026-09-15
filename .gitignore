@@ -28,4 +28,5 @@ replay_pid*
 # Maven build output
 target/
 # Environment Variables
+.env
 backend/.env

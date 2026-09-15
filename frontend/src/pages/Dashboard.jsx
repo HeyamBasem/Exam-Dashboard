@@ -1,10 +1,12 @@
 import React from "react";
 import { LayoutDashboard, LogOut, Shield, BookOpen, Users, Clock, Plus } from "lucide-react";
 import { AuthContext } from "../auth/AuthContext";
+import { useNavigate } from "react-router-dom";
 import "./Dashboard.css";
 
 const Dashboard = () => {
   const { user, logout } = React.useContext(AuthContext);
+  const navigate = useNavigate();
 
   const getRoleIcon = () => {
     switch (user?.role) {
@@ -32,9 +34,15 @@ const Dashboard = () => {
               {getRoleIcon()}
               {user?.role || "STUDENT"}
             </div>
-            <button className="btn-header-primary">
-              <Plus size={16} /> New Assessment
-            </button>
+            {/* Only allow ADMIN and TEACHER to import assessments */}
+            {(user?.role === "ADMIN" || user?.role === "TEACHER") && (
+              <button 
+                className="btn-header-primary"
+                onClick={() => navigate("/import")}
+              >
+                <Plus size={16} /> New Assessment
+              </button>
+            )}
           </div>
         </div>
       </div>
@@ -74,13 +82,17 @@ const Dashboard = () => {
               <span>Feature coming soon</span>
             </div>
           </div>
-          <div className="coming-soon-card">
+          <div 
+            className="coming-soon-card" 
+            onClick={() => navigate('/assessments')}
+            style={{ cursor: 'pointer' }}
+          >
             <div className="card-icon-wrapper">
               <BookOpen size={24} />
             </div>
             <div className="card-info">
               <h4>Assessments Builder</h4>
-              <span>Feature coming soon</span>
+              <span style={{ color: '#3b82f6', fontWeight: '500' }}>Manage Assessments</span>
             </div>
           </div>
           <div className="coming-soon-card">
